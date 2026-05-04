@@ -250,48 +250,90 @@
   .s1-meta strong { color: var(--white); font-weight: 500; }
 
   /* ============ SLIDE 2: THE PROBLEM ============ */
-  .s2 { justify-content: center; }
-  .s2-top { display: flex; flex-direction: column; margin-bottom: 24px; }
-  .s2-mid { display: flex; flex-direction: column; margin-bottom: 48px; }
-  .s2-bot { display: flex; flex-direction: column; gap: 20px; }
+  .s2 { justify-content: center; gap: clamp(28px, 3vh, 44px); }
+  .s2-top { display: flex; flex-direction: column; gap: 22px; }
+  .s2-headline {
+    font-family: var(--sans);
+    font-size: clamp(42px, 5vw, 76px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .s2-headline .accent { color: var(--primary); }
 
+  .s2-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(16px, 1.4vw, 24px);
+    align-items: stretch;
+  }
+  .problem-card {
+    background: var(--grey);
+    border: 1px solid var(--white-10);
+    border-radius: 14px;
+    padding: clamp(28px, 3vh, 40px) clamp(28px, 2.4vw, 36px);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .problem-card .num {
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--primary);
+    text-transform: uppercase;
+  }
+  .problem-card h4 {
+    font-family: var(--sans);
+    font-size: clamp(20px, 1.7vw, 26px);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+  }
+  .problem-card p {
+    font-family: var(--sans);
+    font-size: clamp(14px, 1.05vw, 16px);
+    color: var(--white-75);
+    line-height: 1.55;
+  }
+
+  .s2-quote-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: clamp(20px, 2vw, 32px);
+    align-items: center;
+    background: linear-gradient(90deg, rgba(178, 75, 243, 0.12), transparent 70%);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 12px 12px 0;
+    padding: clamp(22px, 2.4vh, 32px) clamp(28px, 2.4vw, 40px);
+  }
   .s2-quote-mark {
     font-family: var(--sans);
-    font-size: clamp(140px, 13vw, 220px);
+    font-size: clamp(72px, 7vw, 112px);
     font-weight: 700;
     color: var(--primary);
-    line-height: 0.7;
-    opacity: 0.35;
-    margin-top: 4px;
+    line-height: 0.6;
+    opacity: 0.5;
     letter-spacing: -0.04em;
+    margin-top: 12px;
   }
-
+  .s2-quote-body { display: flex; flex-direction: column; gap: 8px; }
   .s2-quote {
     font-family: var(--sans);
-    font-size: clamp(46px, 5.2vw, 84px);
-    font-weight: 600;
-    line-height: 1.12;
-    letter-spacing: -0.025em;
-    max-width: 1280px;
+    font-size: clamp(20px, 1.6vw, 26px);
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    color: var(--white);
   }
-
   .s2-attr {
     font-family: var(--mono);
-    font-size: 13px;
+    font-size: 12px;
     letter-spacing: 2px;
     color: var(--white-50);
     text-transform: uppercase;
   }
   .s2-attr::before { content: '— '; color: var(--primary); }
-
-  .s2-frame {
-    font-family: var(--sans);
-    font-size: 19px;
-    color: var(--white-50);
-    font-style: italic;
-    max-width: 620px;
-    line-height: 1.5;
-  }
 
   /* ============ SLIDE 3: ORIGINAL SCOPE ============ */
   .s3 { justify-content: center; }
@@ -765,30 +807,37 @@
   }
 
   /* ============ SLIDE: DEMO (live demo or embedded video) ============ */
-  .s-demo { justify-content: center; align-items: center; text-align: center; gap: clamp(28px, 3vh, 44px); }
+  .s-demo { justify-content: center; align-items: center; text-align: center; gap: clamp(20px, 2.4vh, 36px); }
   .s-demo .eyebrow { margin-bottom: 0; }
-  .s-demo-headline { font-size: clamp(48px, 5.6vw, 88px); }
-  .s-demo-frame {
+  .s-demo-intro {
     font-family: var(--sans);
-    font-size: clamp(18px, 1.4vw, 22px);
-    color: var(--white-50);
-    line-height: 1.5;
-    max-width: 720px;
+    font-size: clamp(22px, 2vw, 32px);
+    font-weight: 500;
+    color: var(--white-75);
+    line-height: 1.3;
+    letter-spacing: -0.015em;
   }
+  .s-demo-intro .accent { color: var(--primary); }
   .s-demo-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
+    font-family: var(--pixel);
+    font-size: clamp(72px, 9vw, 144px);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--white);
+    text-decoration: none;
+    text-shadow: 0 0 80px rgba(178, 75, 243, 0.45);
+    display: inline-block;
+    transition: transform 200ms ease;
+  }
+  .s-demo-cta:hover { transform: scale(1.02); }
+  .s-demo-cta .accent { color: var(--primary); }
+  .s-demo-frame {
     font-family: var(--mono);
-    font-size: 14px;
+    font-size: clamp(12px, 1vw, 14px);
+    color: var(--white-50);
     letter-spacing: 2.5px;
-    color: var(--primary);
     text-transform: uppercase;
-    padding: 18px 28px;
-    border: 1px dashed var(--primary);
-    border-radius: 8px;
-    width: fit-content;
-    margin: 0 auto;
   }
 
   /* ============ SLIDE: IMPACT (between insights and features) ============ */
@@ -1167,14 +1216,33 @@
 <section class="slide s2">
   <div class="s2-top">
     <div class="eyebrow anim anim-1">The Problem</div>
-    <div class="s2-quote-mark anim anim-2">"</div>
+    <h2 class="s2-headline anim anim-2">Students struggle to <span class="accent">discover and attend</span> social events on campus.</h2>
   </div>
-  <div class="s2-mid">
-    <h2 class="s2-quote anim anim-3">I find out about events last minute by seeing other people go.</h2>
+
+  <div class="s2-grid">
+    <div class="problem-card anim anim-3">
+      <div class="num">01 · Discovery</div>
+      <h4>Information is scattered.</h4>
+      <p>Parties live in private group chats, Snap stories, Instagram, and YikYak. There's no single source of truth for what's happening tonight.</p>
+    </div>
+    <div class="problem-card anim anim-4">
+      <div class="num">02 · Timing</div>
+      <h4>Plans surface last-minute.</h4>
+      <p>Students hear about events the day-of — or after they've already started. By then, they're either too late or already committed elsewhere.</p>
+    </div>
+    <div class="problem-card anim anim-5">
+      <div class="num">03 · Social signal.</div>
+      <h4>Going alone feels uncomfortable.</h4>
+      <p>Even when the event sounds great, walking in without knowing if anyone is there is uncomfortable — especially for freshmen.</p>
+    </div>
   </div>
-  <div class="s2-bot">
-    <div class="s2-attr anim anim-4">Sophomore, Temple University</div>
-    <p class="s2-frame anim anim-5">College weekends shouldn't depend on scrambling around groupchats, Instagram or YikYak</p>
+
+  <div class="s2-quote-row anim anim-6">
+    <div class="s2-quote-mark">"</div>
+    <div class="s2-quote-body">
+      <p class="s2-quote">I find out about events last minute by seeing other people go.</p>
+      <div class="s2-attr">Sophomore, Temple University</div>
+    </div>
   </div>
 </section>
 
@@ -1216,7 +1284,7 @@
     </div>
     <div class="stat-card anim anim-5">
       <div class="num">50+</div>
-      <div class="label">Informal conversations with students who go out regularly</div>
+      <div class="label">Informal conversations</div>
     </div>
   </div>
   <div class="s4-takeaway anim anim-6">Everyone had a different story about <strong>friendship</strong>, <strong>campus events</strong>, and <strong>weekday plans</strong>. But one thing was universal: <strong>"I like going out on the weekends."</strong></div>
@@ -1237,7 +1305,7 @@
     <div class="pivot-arrow anim anim-4">→</div>
     <div class="pivot-side after anim anim-5">
       <div class="label">AFTER</div>
-      <h4>Tuparties</h4>
+      <h4>tuparties</h4>
       <p>One simple bottleneck for a behavior students <em style="color:var(--white)">already</em> do every weekend — finding out what's the move tonight.</p>
     </div>
   </div>
@@ -1343,9 +1411,9 @@
 <!-- ============ SLIDE: DEMO ============ -->
 <section class="slide s-demo">
   <div class="eyebrow anim anim-1">Live Demo</div>
-  <h2 class="h2 s-demo-headline anim anim-2">Let's <span class="accent">see it</span>.</h2>
-  <p class="s-demo-frame anim anim-3">Quick walk-through of the live product — Home, Map, and Rankings — with real data from this week.</p>
-  <div class="s-demo-cta anim anim-4">tuparties.com</div>
+  <p class="s-demo-intro anim anim-2">Let's <span class="accent">see it</span> — Home, Map, Rankings, with real data from this week.</p>
+  <a href="https://tuparties.com" target="_blank" rel="noopener" class="s-demo-cta anim anim-3">tu<span class="accent">parties</span>.com</a>
+  <div class="s-demo-frame anim anim-4">Try it out!</div>
 </section>
 
 <!-- ============ SLIDE 8: LIVE VALIDATION ============ -->
