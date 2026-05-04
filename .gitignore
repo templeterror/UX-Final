@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+*.zip
+*.zip.download
+
+# Don't deploy private course materials
+Class slides/
+data.csv
+navigate-clicked.csv
+thedeck.html

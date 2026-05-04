@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tuparties — Final Readout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Geist:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0B0B0B;
+    --grey: #252525;
+    --modal: #282828;
+    --primary: #B24BF3;
+    --primary-dim: #8E36C7;
+    --secondary: #E0D4FF;
+    --white: #FFFFFF;
+    --white-75: rgba(255, 255, 255, 0.75);
+    --white-50: rgba(255, 255, 255, 0.50);
+    --white-25: rgba(255, 255, 255, 0.25);
+    --white-10: rgba(255, 255, 255, 0.10);
+    --pixel: 'Bricolage Grotesque', sans-serif;
+    --sans: 'Geist', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: var(--sans);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    user-select: none;
+  }
+
+  /* Subtle dot grid backdrop */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow gradient backdrop */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 80% 20%, rgba(178, 75, 243, 0.08), transparent 60%),
+                radial-gradient(ellipse 50% 40% at 10% 90%, rgba(178, 75, 243, 0.06), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: clamp(88px, 9vh, 120px) clamp(80px, 6vw, 140px) clamp(80px, 8vh, 112px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 400ms ease, transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateY(20px);
+  }
+  .slide > * {
+    width: 100%;
+    max-width: 1400px;
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* HUD */
+  .hud {
+    position: fixed;
+    top: clamp(28px, 3vh, 48px);
+    left: clamp(56px, 5vw, 96px);
+    right: clamp(56px, 5vw, 96px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  .hud-logo {
+    font-family: var(--pixel);
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: var(--white-75);
+    line-height: 1;
+  }
+  .hud-logo span { color: var(--primary); }
+
+  .hud-meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--white-50);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .counter {
+    position: fixed;
+    bottom: clamp(28px, 3vh, 48px);
+    right: clamp(56px, 5vw, 96px);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--white-50);
+    z-index: 10;
+    letter-spacing: 2px;
+  }
+  .counter .current { color: var(--primary); }
+
+  .nav-hint {
+    position: fixed;
+    bottom: clamp(28px, 3vh, 48px);
+    left: clamp(56px, 5vw, 96px);
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--white-25);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    z-index: 10;
+  }
+  .nav-hint kbd {
+    font-family: var(--mono);
+    background: var(--white-10);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin: 0 2px;
+    color: var(--white-75);
+  }
+
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 2px;
+    background: var(--primary);
+    box-shadow: 0 0 12px var(--primary);
+    transition: width 400ms cubic-bezier(0.22, 1, 0.36, 1);
+    z-index: 100;
+  }
+
+  /* Common slide elements */
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--primary);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+
+  .h1 {
+    font-family: var(--sans);
+    font-size: clamp(48px, 5.6vw, 88px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .h2 {
+    font-family: var(--sans);
+    font-size: clamp(40px, 4.6vw, 72px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+  }
+
+  .h3 {
+    font-family: var(--sans);
+    font-size: clamp(20px, 2vw, 26px);
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--white-75);
+    letter-spacing: -0.01em;
+  }
+
+  .body {
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--white-75);
+    font-weight: 400;
+  }
+
+  .accent { color: var(--primary); }
+  .pixel { font-family: var(--pixel); }
+
+  /* ============ SLIDE 1: TITLE ============ */
+  .s1 { justify-content: center; align-items: center; text-align: center; }
+
+  .s1-logo {
+    font-family: var(--pixel);
+    font-size: clamp(80px, 11vw, 168px);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--white);
+    text-shadow: 0 0 60px rgba(178, 75, 243, 0.4);
+    margin-bottom: 36px;
+  }
+  .s1-logo span { color: var(--primary); }
+
+  .s1-tagline {
+    font-family: var(--sans);
+    font-size: clamp(20px, 1.8vw, 24px);
+    font-weight: 400;
+    color: var(--white-75);
+    max-width: 640px;
+    margin: 0 auto 56px;
+    line-height: 1.45;
+  }
+
+  .s1-divider {
+    width: 64px;
+    height: 1px;
+    background: var(--primary);
+    margin: 0 auto 28px;
+  }
+
+  .s1-meta {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--white-50);
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+  }
+  .s1-meta strong { color: var(--white); font-weight: 500; }
+
+  /* ============ SLIDE 2: THE PROBLEM ============ */
+  .s2 { justify-content: center; }
+  .s2-top { display: flex; flex-direction: column; margin-bottom: 24px; }
+  .s2-mid { display: flex; flex-direction: column; margin-bottom: 48px; }
+  .s2-bot { display: flex; flex-direction: column; gap: 20px; }
+
+  .s2-quote-mark {
+    font-family: var(--sans);
+    font-size: clamp(140px, 13vw, 220px);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 0.7;
+    opacity: 0.35;
+    margin-top: 4px;
+    letter-spacing: -0.04em;
+  }
+
+  .s2-quote {
+    font-family: var(--sans);
+    font-size: clamp(46px, 5.2vw, 84px);
+    font-weight: 600;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    max-width: 1280px;
+  }
+
+  .s2-attr {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--white-50);
+    text-transform: uppercase;
+  }
+  .s2-attr::before { content: '— '; color: var(--primary); }
+
+  .s2-frame {
+    font-family: var(--sans);
+    font-size: 19px;
+    color: var(--white-50);
+    font-style: italic;
+    max-width: 620px;
+    line-height: 1.5;
+  }
+
+  /* ============ SLIDE 3: ORIGINAL SCOPE ============ */
+  .s3 { justify-content: center; }
+  .s3-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: clamp(48px, 5vw, 96px);
+    align-items: center;
+  }
+  .s3-grid > div:first-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .s3-headline { font-size: clamp(40px, 4.6vw, 64px); margin-bottom: 24px; }
+  .s3-grid > div:first-child .body { max-width: 480px; }
+
+  .tagalong-card {
+    background: var(--grey);
+    border: 1px solid var(--white-10);
+    border-radius: 14px;
+    padding: clamp(40px, 3.5vh, 56px) clamp(40px, 3vw, 56px);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .tagalong-card::before {
+    content: 'TAGALONG';
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--white-25);
+  }
+  .tagalong-card h4 {
+    font-family: var(--sans);
+    font-size: clamp(24px, 2vw, 30px);
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    max-width: 90%;
+  }
+  .tagalong-list {
+    list-style: none;
+    margin-top: 16px;
+  }
+  .tagalong-list li {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--white-10);
+    color: var(--white-75);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    line-height: 1.4;
+  }
+  .tagalong-list li::before {
+    content: '○';
+    color: var(--primary);
+    font-size: 12px;
+  }
+  .tagalong-list li:last-child { border: 0; }
+  .tagalong-verdict {
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px dashed var(--white-25);
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--white-50);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  /* ============ SLIDE 4: RESEARCH ============ */
+  .s4 { justify-content: center; gap: clamp(36px, 4vh, 56px); }
+  .s4-top { display: flex; flex-direction: column; }
+  .s4-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(20px, 1.8vw, 32px);
+  }
+  .stat-card {
+    background: var(--grey);
+    border: 1px solid var(--white-10);
+    border-radius: 14px;
+    padding: clamp(40px, 4.5vh, 64px) clamp(36px, 3vw, 56px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .stat-card .num {
+    font-family: var(--sans);
+    font-size: clamp(96px, 9vw, 152px);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 20px;
+  }
+  .stat-card .label {
+    font-family: var(--sans);
+    font-size: clamp(16px, 1.15vw, 19px);
+    color: var(--white-75);
+    line-height: 1.45;
+  }
+
+  .s4-takeaway {
+    padding: clamp(24px, 2.4vh, 36px) clamp(28px, 2.4vw, 40px);
+    background: linear-gradient(90deg, rgba(178, 75, 243, 0.15), transparent);
+    border-left: 3px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    font-size: clamp(20px, 1.6vw, 26px);
+    line-height: 1.45;
+    color: var(--white);
+    font-weight: 500;
+  }
+  .s4-takeaway strong { color: var(--primary); }
+
+  /* ============ SLIDE 5: THE PIVOT ============ */
+  .s5 { justify-content: center; gap: clamp(40px, 5vh, 64px); }
+  .s5-top { display: flex; flex-direction: column; gap: 8px; }
+  .s5-headline {
+    font-size: clamp(40px, 4.6vw, 68px);
+  }
+  .s5-headline em { color: var(--primary); font-style: normal; font-family: var(--pixel); font-weight: 700; }
+
+  .pivot-compare {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: clamp(24px, 2vw, 40px);
+    align-items: stretch;
+  }
+  .pivot-side {
+    padding: clamp(40px, 4vh, 60px) clamp(36px, 2.8vw, 52px) clamp(44px, 4.4vh, 64px);
+    border-radius: 14px;
+    border: 1px solid var(--white-10);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .pivot-side.before { background: var(--grey); }
+  .pivot-side.after { background: linear-gradient(135deg, rgba(178, 75, 243, 0.18), rgba(178, 75, 243, 0.04)); border-color: var(--primary); }
+  .pivot-side .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--white-50);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .pivot-side.after .label { color: var(--primary); }
+  .pivot-side h4 {
+    font-family: var(--sans);
+    font-size: clamp(30px, 2.4vw, 38px);
+    font-weight: 700;
+    margin-bottom: 18px;
+    letter-spacing: -0.02em;
+  }
+  .pivot-side p {
+    color: var(--white-75);
+    font-size: clamp(16px, 1.15vw, 18px);
+    line-height: 1.55;
+  }
+  .pivot-arrow {
+    align-self: center;
+    font-family: var(--sans);
+    font-weight: 300;
+    font-size: clamp(56px, 5vw, 84px);
+    color: var(--primary);
+    line-height: 1;
+  }
+  .s5-stamp {
+    font-family: var(--mono);
+    font-size: 18px;
+    letter-spacing: 2.5px;
+    color: var(--white-50);
+    text-transform: uppercase;
+  }
+  .s5-stamp .accent { color: var(--primary); }
+
+  /* ============ SLIDE 6: PERSONA ============ */
+  .s6 { justify-content: center; gap: clamp(36px, 4vh, 56px); }
+  .s6-top { display: flex; flex-direction: column; }
+  .s6-top .h2 { margin-bottom: 0 !important; }
+  .persona-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(24px, 2.2vw, 40px);
+    align-items: stretch;
+  }
+  .persona-card {
+    background: var(--grey);
+    border: 1px solid var(--white-10);
+    border-radius: 14px;
+    padding: clamp(40px, 4vh, 56px) clamp(36px, 2.8vw, 52px);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .persona-card.primary {
+    background: linear-gradient(135deg, rgba(178, 75, 243, 0.18), rgba(178, 75, 243, 0.04));
+    border-color: var(--primary);
+  }
+  .persona-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--primary);
+    text-transform: uppercase;
+    background: rgba(178, 75, 243, 0.15);
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    align-self: flex-start;
+  }
+  .persona-card.secondary .persona-tag {
+    color: var(--white);
+    background: var(--white-10);
+  }
+  .persona-card h4 {
+    font-family: var(--sans);
+    font-size: clamp(28px, 2.3vw, 36px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 18px;
+  }
+  .persona-card p { color: var(--white-75); font-size: clamp(16px, 1.15vw, 18px); line-height: 1.6; margin-bottom: 24px; }
+  .persona-card ul { list-style: none; padding-top: 20px; border-top: 1px solid var(--white-10); }
+  .persona-card ul li {
+    color: var(--white-75);
+    font-size: 15.5px;
+    line-height: 1.5;
+    padding: 8px 0;
+    display: flex;
+    gap: 12px;
+  }
+  .persona-card ul li::before { content: '→'; color: var(--primary); flex-shrink: 0; }
+
+  .s6-constraint {
+    font-family: var(--mono);
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--white-50);
+    text-transform: uppercase;
+    padding: 14px 22px;
+    border: 1px dashed var(--white-25);
+    border-radius: 6px;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .s6-constraint .x { color: var(--primary); }
+
+  /* ============ DESIGN VERSION SLIDES (V1, V2, V3) ============ */
+  .s-design { justify-content: center; gap: clamp(28px, 3.5vh, 48px); }
+  .s-design-top { display: flex; flex-direction: column; gap: 18px; }
+  .s-design-top .version-tag {
+    font-family: var(--mono);
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: var(--primary);
+    text-transform: uppercase;
+    background: rgba(178, 75, 243, 0.12);
+    padding: 8px 18px;
+    border-radius: 4px;
+    width: fit-content;
+  }
+  .s-design-headline { font-size: clamp(36px, 4vw, 56px); }
+  .s-design-frame {
+    font-family: var(--sans);
+    font-size: clamp(16px, 1.2vw, 19px);
+    color: var(--white-50);
+    line-height: 1.55;
+    max-width: 880px;
+  }
+  .design-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(20px, 2vw, 40px);
+    align-items: end;
+    justify-items: center;
+  }
+  .design-row-2 {
+    grid-template-columns: repeat(2, minmax(0, 320px));
+    justify-content: center;
+  }
+  .design-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+  }
+  .design-screen img {
+    width: 100%;
+    max-width: clamp(220px, 18vw, 300px);
+    height: auto;
+    max-height: clamp(440px, 56vh, 600px);
+    object-fit: contain;
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(178, 75, 243, 0.18), 0 0 0 1px var(--white-10);
+    display: block;
+  }
+  .design-screen .caption {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--white-50);
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  /* ============ SLIDE 8: LIVE VALIDATION ============ */
+  .s8 { justify-content: center; gap: clamp(28px, 3.2vh, 44px); }
+  .s8-top { display: flex; flex-direction: column; }
+  .s8-headline {
+    font-size: clamp(40px, 4.6vw, 64px);
+    margin-bottom: 14px;
+  }
+  .s8-sub {
+    font-size: clamp(17px, 1.3vw, 20px);
+    color: var(--white-50);
+    max-width: 720px;
+    line-height: 1.5;
+  }
+  .s8-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(16px, 1.4vw, 24px);
+  }
+  .metric {
+    background: var(--grey);
+    border: 1px solid var(--white-10);
+    border-radius: 14px;
+    padding: clamp(36px, 4vh, 56px) clamp(28px, 2.2vw, 40px);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .metric::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary);
+    opacity: 0.6;
+  }
+  .metric .val {
+    font-family: var(--sans);
+    font-size: clamp(60px, 5.2vw, 88px);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 16px;
+    letter-spacing: -0.03em;
+  }
+  .metric .lbl {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--white-50);
+  }
+  .s8-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(16px, 1.4vw, 24px);
+  }
+  .badge-card {
+    background: var(--grey);
+    border: 1px solid var(--white-10);
+    border-radius: 14px;
+    padding: clamp(28px, 2.8vh, 40px) clamp(28px, 2.4vw, 40px);
+    display: flex;
+    align-items: center;
+    gap: 26px;
+  }
+  .badge-num {
+    font-family: var(--sans);
+    font-size: clamp(52px, 4.5vw, 72px);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    flex-shrink: 0;
+  }
+  .badge-text {
+    font-family: var(--sans);
+    font-size: clamp(16px, 1.15vw, 19px);
+    color: var(--white-75);
+    line-height: 1.45;
+  }
+  .badge-text strong { color: var(--white); font-weight: 600; }
+
+  /* ============ SLIDE 9: DATA INSIGHTS ============ */
+  .s9 { justify-content: center; gap: clamp(36px, 4vh, 56px); }
+  .s9-top { display: flex; flex-direction: column; gap: 22px; }
+  .s9-headline { font-size: clamp(36px, 3.8vw, 54px); }
+  .insight-stack { display: flex; flex-direction: column; gap: clamp(16px, 1.6vh, 24px); }
+
+  .insight {
+    display: grid;
+    grid-template-columns: clamp(220px, 16vw, 280px) 1fr;
+    gap: clamp(32px, 2.6vw, 48px);
+    background: var(--grey);
+    border: 1px solid var(--white-10);
+    border-radius: 14px;
+    padding: clamp(36px, 4vh, 56px) clamp(36px, 3vw, 52px);
+    align-items: center;
+  }
+  .insight.surprise { border-color: var(--primary); background: linear-gradient(90deg, rgba(178, 75, 243, 0.1), var(--grey) 50%); }
+  .insight-num {
+    font-family: var(--sans);
+    font-size: clamp(96px, 8vw, 132px);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .insight-num small { font-size: clamp(40px, 3.4vw, 56px); font-weight: 600; }
+  .insight-body h4 {
+    font-family: var(--sans);
+    font-size: clamp(22px, 1.7vw, 28px);
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+  }
+  .insight-body p {
+    color: var(--white-75);
+    font-size: clamp(16px, 1.15vw, 18px);
+    line-height: 1.55;
+    max-width: 800px;
+  }
+  .insight-body .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--primary);
+    background: rgba(178, 75, 243, 0.12);
+    padding: 4px 10px;
+    border-radius: 3px;
+    margin-bottom: 12px;
+  }
+
+  /* Mini bar chart for weekend pattern */
+  .dow-chart { display: flex; align-items: flex-end; gap: 6px; height: 64px; margin-top: 16px; max-width: 320px; }
+  .dow-bar { flex: 1; background: var(--white-10); border-radius: 2px 2px 0 0; position: relative; }
+  .dow-bar.hi { background: var(--primary); }
+  .dow-bar::after {
+    content: attr(data-day);
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--white-50);
+    letter-spacing: 1px;
+  }
+
+  /* ============ SLIDE: DEMO (live demo or embedded video) ============ */
+  .s-demo { justify-content: center; align-items: center; text-align: center; gap: clamp(28px, 3vh, 44px); }
+  .s-demo .eyebrow { margin-bottom: 0; }
+  .s-demo-headline { font-size: clamp(48px, 5.6vw, 88px); }
+  .s-demo-frame {
+    font-family: var(--sans);
+    font-size: clamp(18px, 1.4vw, 22px);
+    color: var(--white-50);
+    line-height: 1.5;
+    max-width: 720px;
+  }
+  .s-demo-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 14px;
+    letter-spacing: 2.5px;
+    color: var(--primary);
+    text-transform: uppercase;
+    padding: 18px 28px;
+    border: 1px dashed var(--primary);
+    border-radius: 8px;
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+  /* ============ SLIDE: IMPACT (between insights and features) ============ */
+  .s-impact { justify-content: center; gap: clamp(36px, 4vh, 56px); }
+  .s-impact-top { display: flex; flex-direction: column; gap: 22px; }
+  .s-impact-headline { font-size: clamp(40px, 4.6vw, 64px); }
+
+  .impact-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: clamp(20px, 1.8vw, 32px);
+    align-items: stretch;
+  }
+  .impact-hero {
+    background: linear-gradient(135deg, rgba(178, 75, 243, 0.22), rgba(178, 75, 243, 0.04));
+    border: 1px solid var(--primary);
+    border-radius: 14px;
+    padding: clamp(40px, 4.5vh, 64px) clamp(40px, 3vw, 56px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .impact-hero .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--primary);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .impact-hero .num {
+    font-family: var(--sans);
+    font-size: clamp(96px, 9vw, 152px);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 16px;
+  }
+  .impact-hero .num .accent { color: var(--primary); }
+  .impact-hero .label {
+    font-family: var(--sans);
+    font-size: clamp(17px, 1.3vw, 20px);
+    color: var(--white-75);
+    line-height: 1.5;
+    max-width: 460px;
+  }
+  .impact-hero .label strong { color: var(--white); font-weight: 600; }
+
+  .impact-side {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 1.4vh, 22px);
+  }
+  .impact-stat {
+    background: var(--grey);
+    border: 1px solid var(--white-10);
+    border-radius: 14px;
+    padding: clamp(24px, 2.6vh, 36px) clamp(28px, 2.4vw, 40px);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .impact-stat .num {
+    font-family: var(--sans);
+    font-size: clamp(44px, 4vw, 64px);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin-bottom: 10px;
+  }
+  .impact-stat .label {
+    font-family: var(--sans);
+    font-size: clamp(14px, 1vw, 16px);
+    color: var(--white-75);
+    line-height: 1.45;
+  }
+
+  .impact-footer {
+    font-family: var(--sans);
+    font-size: clamp(17px, 1.3vw, 20px);
+    color: var(--white-75);
+    line-height: 1.5;
+    max-width: 1100px;
+  }
+  .impact-footer strong { color: var(--white); font-weight: 600; }
+  .impact-footer .accent { color: var(--primary); font-weight: 600; }
+
+  /* ============ SLIDE 10: NEW FEATURES ============ */
+  .s10 { justify-content: center; }
+  .s10-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: clamp(48px, 5vw, 96px);
+    align-items: center;
+  }
+  .s10-grid > div:first-child {
+    display: flex;
+    flex-direction: column;
+  }
+  .s10-grid > div:last-child {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .s10-headline { font-size: clamp(38px, 4.4vw, 60px); margin-bottom: 16px; }
+  .s10-frame {
+    font-size: clamp(17px, 1.3vw, 20px);
+    color: var(--white-50);
+    margin-bottom: 0;
+    max-width: 540px;
+    line-height: 1.55;
+  }
+  .feature-list { list-style: none; margin-top: clamp(24px, 3vh, 40px); }
+  .feature-list li {
+    padding: clamp(22px, 2.4vh, 32px) 0;
+    border-top: 1px solid var(--white-10);
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+  }
+  .feature-list li:last-child { border-bottom: 1px solid var(--white-10); }
+  .feature-num {
+    font-family: var(--sans);
+    font-size: clamp(32px, 2.4vw, 42px);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    flex-shrink: 0;
+    width: 56px;
+    padding-top: 2px;
+  }
+  .feature-content h5 {
+    font-family: var(--sans);
+    font-size: clamp(20px, 1.6vw, 24px);
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.015em;
+  }
+  .feature-content p {
+    color: var(--white-50);
+    font-size: clamp(15px, 1.1vw, 17px);
+    line-height: 1.55;
+  }
+
+  .phone-image {
+    width: clamp(280px, 22vw, 360px);
+    height: auto;
+    max-height: clamp(560px, 70vh, 760px);
+    object-fit: contain;
+    border-radius: 28px;
+    box-shadow: 0 30px 80px rgba(178, 75, 243, 0.25), 0 0 0 1px var(--white-10);
+    display: block;
+  }
+
+  /* Phone mockup (legacy, no longer used on s10) */
+  .phone-mock {
+    width: clamp(280px, 22vw, 340px);
+    height: clamp(560px, 62vh, 680px);
+    background: #000;
+    border-radius: 36px;
+    border: 8px solid #1a1a1a;
+    margin: 0 auto;
+    padding: 22px 14px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 30px 80px rgba(178, 75, 243, 0.2), 0 0 0 1px var(--white-10);
+    position: relative;
+  }
+  .phone-header {
+    font-family: var(--pixel);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.05;
+    margin-bottom: 18px;
+    letter-spacing: -0.02em;
+  }
+  .phone-tabs {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .phone-tab {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 999px;
+    background: var(--grey);
+    color: var(--white);
+  }
+  .phone-tab.active { background: var(--primary); }
+  .phone-card {
+    background: var(--grey);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+  }
+  .phone-card-img {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #c41e3a, #6b1322);
+    border-radius: 6px;
+    flex-shrink: 0;
+    font-family: var(--pixel);
+    font-size: 8px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .phone-card-body { flex: 1; min-width: 0; }
+  .phone-card-tag {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--primary);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .phone-card-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    line-height: 1.2;
+  }
+  .phone-card-meta {
+    font-size: 9px;
+    color: var(--white-50);
+    line-height: 1.3;
+  }
+  .phone-cta {
+    margin-top: 6px;
+    background: var(--primary);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .phone-nav {
+    margin-top: auto;
+    background: var(--primary);
+    border-radius: 999px;
+    padding: 10px 24px;
+    display: flex;
+    justify-content: space-around;
+    color: white;
+    font-size: 14px;
+  }
+
+  /* ============ SLIDE 11: WHAT'S NEXT ============ */
+  .s11 { justify-content: center; gap: clamp(36px, 4vh, 56px); }
+  .s11-top { display: flex; flex-direction: column; gap: 22px; }
+  .s11-headline { font-size: clamp(40px, 4.6vw, 64px); }
+  .next-list {
+    display: grid;
+    gap: clamp(14px, 1.4vh, 22px);
+  }
+  .next-item {
+    display: grid;
+    grid-template-columns: clamp(72px, 6vw, 96px) 1fr auto;
+    gap: clamp(28px, 2.4vw, 40px);
+    padding: clamp(30px, 3.4vh, 48px) clamp(32px, 2.8vw, 48px);
+    background: var(--grey);
+    border: 1px solid var(--white-10);
+    border-radius: 14px;
+    align-items: center;
+  }
+  .next-step {
+    font-family: var(--sans);
+    font-size: clamp(38px, 3.2vw, 56px);
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+  .next-text h5 {
+    font-size: clamp(20px, 1.6vw, 25px);
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.015em;
+  }
+  .next-text p { color: var(--white-50); font-size: clamp(15px, 1.1vw, 17.5px); line-height: 1.5; max-width: 760px; }
+  .next-when {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--white-50);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ============ SLIDE 12: CLOSE ============ */
+  .s12 { justify-content: center; align-items: center; text-align: center; }
+  .s12-stat {
+    font-family: var(--mono);
+    font-size: clamp(20px, 1.8vw, 26px);
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 28px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .s12-stat .arrow { color: var(--white-25); margin: 0 14px; }
+  .s12-thanks {
+    font-family: var(--sans);
+    font-size: clamp(72px, 9vw, 132px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    margin-bottom: 36px;
+  }
+  .s12-thanks span {
+    background: linear-gradient(135deg, var(--white) 30%, var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .s12-q { font-family: var(--mono); font-size: 12px; letter-spacing: 4px; color: var(--white-50); text-transform: uppercase; }
+
+  /* ============ ANIMATIONS ============ */
+  .slide.active .anim {
+    animation: rise 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  .slide.active .anim-1 { animation-delay: 100ms; }
+  .slide.active .anim-2 { animation-delay: 200ms; }
+  .slide.active .anim-3 { animation-delay: 300ms; }
+  .slide.active .anim-4 { animation-delay: 400ms; }
+  .slide.active .anim-5 { animation-delay: 500ms; }
+  .slide.active .anim-6 { animation-delay: 600ms; }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+  .slide.active .pulse { animation: pulse 2s ease-in-out infinite; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="hud">
+  <div class="hud-logo">tu<span>parties</span></div>
+  <div class="hud-meta">CLIENT READOUT · MAY 4 2026</div>
+</div>
+
+<div class="counter"><span class="current" id="curNum">01</span> / 16</div>
+<div class="nav-hint"><kbd>←</kbd> <kbd>→</kbd> NAVIGATE · <kbd>SPACE</kbd> NEXT</div>
+
+<div class="deck">
+
+<!-- ============ SLIDE 1: TITLE ============ -->
+<section class="slide s1 active">
+  <h1 class="s1-logo anim anim-1">tu<span>parties</span></h1>
+  <p class="s1-tagline anim anim-2">Event discovery layer for the heart of college social life.</p>
+  <div class="s1-divider anim anim-3"></div>
+  <div class="s1-meta anim anim-4"><strong>Kyle Stressman</strong> · <strong>Rafiat Amir</strong> · CIS 3603 · Spring 2026</div>
+</section>
+
+<!-- ============ SLIDE 2: THE PROBLEM ============ -->
+<section class="slide s2">
+  <div class="s2-top">
+    <div class="eyebrow anim anim-1">The Problem</div>
+    <div class="s2-quote-mark anim anim-2">"</div>
+  </div>
+  <div class="s2-mid">
+    <h2 class="s2-quote anim anim-3">I find out about events last minute by seeing other people go.</h2>
+  </div>
+  <div class="s2-bot">
+    <div class="s2-attr anim anim-4">Sophomore, Temple University</div>
+    <p class="s2-frame anim anim-5">College weekends shouldn't depend on scrambling around groupchats, Instagram or YikYak</p>
+  </div>
+</section>
+
+<!-- ============ SLIDE 3: ORIGINAL SCOPE ============ -->
+<section class="slide s3">
+  <div class="s3-grid">
+    <div>
+      <div class="eyebrow anim anim-1">Where We Started</div>
+      <h2 class="h2 s3-headline anim anim-2">What we <em class="accent" style="font-style:normal">thought</em> we were building.</h2>
+      <p class="body anim anim-3">Our initial concept was <strong style="color:var(--white);font-weight:600">TagAlong</strong> — an app for finding people to do things with when you didn't want to go alone.</p>
+    </div>
+    <div class="tagalong-card anim anim-4">
+      <h4>Things people would do, if only they had company.</h4>
+      <ul class="tagalong-list">
+        <li>Visit a museum on a Sunday afternoon</li>
+        <li>Try a new restaurant in Center City</li>
+        <li>See a film at the Ritz</li>
+        <li>Catch a show, an exhibit, a one-off event</li>
+      </ul>
+      <div class="tagalong-verdict">It sounded great in theory.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 4: RESEARCH ============ -->
+<section class="slide s4">
+  <div class="s4-top">
+    <div class="eyebrow anim anim-1">Research</div>
+    <h2 class="h2 anim anim-2">Then we actually talked to students.</h2>
+  </div>
+  <div class="s4-stats">
+    <div class="stat-card anim anim-3">
+      <div class="num">5</div>
+      <div class="label">Documented user interviews following the course protocol</div>
+    </div>
+    <div class="stat-card anim anim-4">
+      <div class="num">30</div>
+      <div class="label">Students surveyed for quantitative signal on weekend behavior</div>
+    </div>
+    <div class="stat-card anim anim-5">
+      <div class="num">50+</div>
+      <div class="label">Informal conversations with students who go out regularly</div>
+    </div>
+  </div>
+  <div class="s4-takeaway anim anim-6">Everyone had a different story about <strong>friendship</strong>, <strong>campus events</strong>, and <strong>weekday plans</strong>. But one thing was universal: <strong>"I like going out on the weekends."</strong></div>
+</section>
+
+<!-- ============ SLIDE 5: THE PIVOT ============ -->
+<section class="slide s5">
+  <div class="s5-top">
+    <div class="eyebrow anim anim-1">The Pivot</div>
+    <h2 class="h2 s5-headline anim anim-2">We wanted to solve 5 things at once. <em>Then we decided to just solve 1</em>.</h2>
+  </div>
+  <div class="pivot-compare">
+    <div class="pivot-side before anim anim-3">
+      <div class="label">BEFORE</div>
+      <h4>TagAlong</h4>
+      <p>Five different bottlenecks for a behavior people <em style="color:var(--white)">might</em> adopt — discovery, scheduling, trust, social risk, value loop.</p>
+    </div>
+    <div class="pivot-arrow anim anim-4">→</div>
+    <div class="pivot-side after anim anim-5">
+      <div class="label">AFTER</div>
+      <h4>Tuparties</h4>
+      <p>One simple bottleneck for a behavior students <em style="color:var(--white)">already</em> do every weekend — finding out what's the move tonight.</p>
+    </div>
+  </div>
+  <div class="s5-stamp anim anim-6">Less ambition. <span class="accent">More adoption.</span></div>
+</section>
+
+<!-- ============ SLIDE 6: PERSONA ============ -->
+<section class="slide s6">
+  <div class="s6-top">
+    <div class="eyebrow anim anim-1">Who We Designed For</div>
+    <h2 class="h2 anim anim-2">The Two Users.</h2>
+  </div>
+  <div class="persona-grid">
+    <div class="persona-card primary anim anim-3">
+      <span class="persona-tag">Primary user</span>
+      <h4>Students who go out</h4>
+      <p>Looking for a fun weekend after a hectic week.</p>
+      <ul>
+        <li>Underclassmen still settling into campus life</li>
+        <li>Relies on fragmented information to make plans</li>
+        <li>Wants social proof — is anyone else going?</li>
+        <li>Cares about the reputation</li>
+      </ul>
+    </div>
+    <div class="persona-card secondary anim anim-4">
+      <span class="persona-tag">Secondary user</span>
+      <h4>The Hosts</h4>
+      <p>The fraternities, the house-party throwers.</p>
+      <ul>
+        <li>Needs distribution beyond their own network.</li>
+        <li>Wants to see who's coming.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="s6-constraint anim anim-5">Scope constraint: <span class="x">student-hosted parties only.</span> No bars. No clubs. No promoters.</div>
+</section>
+
+<!-- ============ SLIDE: DESIGN V1 ============ -->
+<section class="slide s-design">
+  <div class="s-design-top">
+    <span class="version-tag anim anim-1">Version 1 · First wireframes</span>
+    <h2 class="h2 s-design-headline anim anim-2">The idea on paper but not there yet.</h2>
+    <p class="s-design-frame anim anim-3">Very generic UI. Functional, but ugly. 10+ user feedback told us to rethink.</p>
+  </div>
+  <div class="design-row design-row-2">
+    <div class="design-screen anim anim-4">
+      <img src="screenshots/Home Page v1.PNG" alt="Home page v1" />
+      <div class="caption">Home</div>
+    </div>
+    <div class="design-screen anim anim-5">
+      <img src="screenshots/Maps Page v1.PNG" alt="Map page v1" />
+      <div class="caption">Map</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE: DESIGN V2 ============ -->
+<section class="slide s-design">
+  <div class="s-design-top">
+    <span class="version-tag anim anim-1">Version 2 · The feedback loop.</span>
+    <h2 class="h2 s-design-headline anim anim-2">An usable interface.</h2>
+    <p class="s-design-frame anim anim-3">This is the design the site launched with. It works but it's still medium ugly.</p>
+  </div>
+  <div class="design-row">
+    <div class="design-screen anim anim-4">
+      <img src="screenshots/Home Page v2.PNG" alt="Home page v2" />
+      <div class="caption">Home</div>
+    </div>
+    <div class="design-screen anim anim-5">
+      <img src="screenshots/Map Page v2.PNG" alt="Map page v2" />
+      <div class="caption">Map</div>
+    </div>
+    <div class="design-screen anim anim-6">
+      <img src="screenshots/Ranking Page v2.PNG" alt="Ranking page v2" />
+      <div class="caption">Rankings</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE: DESIGN V3 ============ -->
+<section class="slide s-design">
+  <div class="s-design-top">
+    <span class="version-tag anim anim-1">Version 3 · Making it pretty.</span>
+    <h2 class="h2 s-design-headline anim anim-2">Proper design system.</h2>
+    <p class="s-design-frame anim anim-3">V3 kept almost all the functionality and gave the site a proper design system: consistent colors, intentional typography and more.</p>
+  </div>
+  <div class="design-row">
+    <div class="design-screen anim anim-4">
+      <img src="screenshots/Home Page v3.jpg" alt="Home page v3" />
+      <div class="caption">Home</div>
+    </div>
+    <div class="design-screen anim anim-5">
+      <img src="screenshots/Map Page v3.PNG" alt="Map page v3" />
+      <div class="caption">Map</div>
+    </div>
+    <div class="design-screen anim anim-6">
+      <img src="screenshots/Ranking Page v3.PNG" alt="Ranking page v3" />
+      <div class="caption">Rankings</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE: DEMO ============ -->
+<section class="slide s-demo">
+  <div class="eyebrow anim anim-1">Live Demo</div>
+  <h2 class="h2 s-demo-headline anim anim-2">Let's <span class="accent">see it</span>.</h2>
+  <p class="s-demo-frame anim anim-3">Quick walk-through of the live product — Home, Map, and Rankings — with real data from this week.</p>
+  <div class="s-demo-cta anim anim-4">tuparties.com</div>
+</section>
+
+<!-- ============ SLIDE 8: LIVE VALIDATION ============ -->
+<section class="slide s8">
+  <div class="s8-top">
+    <div class="eyebrow anim anim-1">Live Validation</div>
+    <h2 class="h2 s8-headline anim anim-2">We didn't just run usability tests. <span class="accent">We ran the product.</span></h2>
+    <p class="s8-sub anim anim-3">Tuparties launched the first week of February — 3 weeks in. Real users replaced the test lab.</p>
+  </div>
+
+  <div class="s8-grid">
+    <div class="metric anim anim-3">
+      <div class="val">8.2K</div>
+      <div class="lbl">Unique Visitors</div>
+    </div>
+    <div class="metric anim anim-4">
+      <div class="val">34.8K</div>
+      <div class="lbl">Page Views</div>
+    </div>
+    <div class="metric anim anim-5">
+      <div class="val">26.9K</div>
+      <div class="lbl">Sessions</div>
+    </div>
+    <div class="metric anim anim-6">
+      <div class="val">3:11</div>
+      <div class="lbl">Avg. Session</div>
+    </div>
+  </div>
+  <div class="s8-row">
+    <div class="badge-card anim anim-5">
+      <div class="badge-num">2.5K+</div>
+      <div class="badge-text"><strong>weekly active users</strong> by week 3 of launch.</div>
+    </div>
+    <div class="badge-card anim anim-6">
+      <div class="badge-num">13</div>
+      <div class="badge-text"><strong>hosts partnered</strong> by week 8, plus a four-week paid advertising deal.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 9: DATA INSIGHTS ============ -->
+<section class="slide s9">
+  <div class="s9-top">
+    <div class="eyebrow anim anim-1">What 34K Page Views Taught Us</div>
+    <h2 class="h2 s9-headline anim anim-2">The data confirmed what interviews said — and revealed something we didn't expect.</h2>
+  </div>
+
+  <div class="insight-stack">
+    <div class="insight anim anim-3">
+      <div class="insight-num">72<small>%</small></div>
+      <div class="insight-body">
+        <span class="tag">Confirmed</span>
+        <h4>72% of all traffic happens Thursday through Saturday.</h4>
+        <p>The interview hypothesis — "students go out on weekends" — held up at scale. Saturday is consistently our highest-traffic day, every week.</p>
+        <div class="dow-chart">
+          <div class="dow-bar" style="height:14%" data-day="M"></div>
+          <div class="dow-bar" style="height:16%" data-day="T"></div>
+          <div class="dow-bar" style="height:28%" data-day="W"></div>
+          <div class="dow-bar" style="height:43%" data-day="T"></div>
+          <div class="dow-bar hi" style="height:96%" data-day="F"></div>
+          <div class="dow-bar hi" style="height:100%" data-day="S"></div>
+          <div class="dow-bar" style="height:35%" data-day="S"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight surprise anim anim-4">
+      <div class="insight-num">76<small>%</small></div>
+      <div class="insight-body">
+        <span class="tag" style="color:var(--primary)">Surprising finding</span>
+        <h4>Of users who tap "going," 76% then tap "get directions."</h4>
+        <p>This was the unexpected one. Users aren't just browsing — they're committing and heading there. The funnel from interest → action is stronger than any signal we got in interviews. Real intent moving users.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE: IMPACT ============ -->
+<section class="slide s-impact">
+  <div class="s-impact-top">
+    <div class="eyebrow anim anim-1">Impact</div>
+    <h2 class="h2 s-impact-headline anim anim-2">Attention turned into <span class="accent">revenue</span>.</h2>
+  </div>
+
+  <div class="impact-grid">
+    <div class="impact-hero anim anim-3">
+      <div class="tag">Paid sponsorship · 4 weeks</div>
+      <div class="num">$5K<span class="accent">+</span></div>
+      <div class="label"><strong>in revenue</strong> from 4-week paid partnership with the platform — proving the platform delivers measurable value to advertisers, not just students.</div>
+    </div>
+    <div class="impact-side">
+      <div class="impact-stat anim anim-4">
+        <div class="num">770+</div>
+        <div class="label">Sponsor pin opens — students actively engaging with branded location content.</div>
+      </div>
+      <div class="impact-stat anim anim-5">
+        <div class="num">280+</div>
+        <div class="label">Banner click-throughs in 4 active weeks — strong intent, not passive impressions.</div>
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+<!-- ============ SLIDE 10: NEW FEATURES ============ -->
+<section class="slide s10">
+  <div class="s10-grid">
+    <div>
+      <div class="eyebrow anim anim-1">What's Shipping Next</div>
+      <h2 class="h2 s10-headline anim anim-2">Removing the human bottleneck.</h2>
+      <p class="s10-frame anim anim-3">Until now, every party on the platform was added by hand — hosts texted, we posted. The next iteration removes that friction entirely.</p>
+      <ul class="feature-list">
+        <li class="anim anim-4">
+          <div class="feature-num">01</div>
+          <div class="feature-content">
+            <h5>Profiles</h5>
+            <p>Separate flows for attendees and hosts. Replaces the no-account model that scaled us to 2.5K users but won't scale further. Pre-requisite to a social platform.</p>
+          </div>
+        </li>
+        <li class="anim anim-5">
+          <div class="feature-num">02</div>
+          <div class="feature-content">
+            <h5>Self-serve party creation</h5>
+            <p>Hosts post their own events. No more middleman, no more delays, no more lost listings.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="anim anim-3">
+      <img src="home_page_1.png" alt="Tuparties home page" class="phone-image" />
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 11: WHAT'S NEXT ============ -->
+<section class="slide s11">
+  <div class="s11-top">
+    <div class="eyebrow anim anim-1">Next Steps</div>
+    <h2 class="h2 s11-headline anim anim-2">What we'll do in the fall.</h2>
+  </div>
+  <div class="next-list">
+    <div class="next-item anim anim-3">
+      <div class="next-step">01</div>
+      <div class="next-text">
+        <h5>Validate the new flows with usability tests</h5>
+        <p>The auth and party-creation features ship without test data — that's the next round of moderated sessions.</p>
+      </div>
+      <div class="next-when">Fall</div>
+    </div>
+    <div class="next-item anim anim-4">
+      <div class="next-step">02</div>
+      <div class="next-text">
+        <h5>Expand to other campuses</h5>
+        <p>Temple proved that the model is repeatable. Drexel, Penn, and St. Joe's are all within 5 miles.</p>
+      </div>
+      <div class="next-when">Fall</div>
+    </div>
+    <div class="next-item anim anim-5">
+      <div class="next-step">03</div>
+      <div class="next-text">
+        <h5>Design for cross-campus discovery</h5>
+        <p>The hardest interaction model: a Temple sophomore deciding whether to cross town for a Drexel party. New trust, new social signals.</p>
+      </div>
+      <div class="next-when">Fall</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SLIDE 12: CLOSE ============ -->
+<section class="slide s12">
+  <div class="s12-stat anim anim-1">0 <span class="arrow">→</span> 2,500 <span class="arrow">·</span> 12 weeks</div>
+  <h1 class="s12-thanks anim anim-2"><span>Thank you.</span></h1>
+  <div class="s12-q anim anim-3">QUESTIONS · DISCUSSION · DEMO</div>
+</section>
+
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const counter = document.getElementById('curNum');
+  const progress = document.getElementById('progress');
+  let current = 0;
+
+  function go(i) {
+    if (i < 0 || i >= total) return;
+    slides[current].classList.remove('active');
+    current = i;
+    slides[current].classList.add('active');
+    counter.textContent = String(current + 1).padStart(2, '0');
+    progress.style.width = ((current + 1) / total * 100) + '%';
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(current + 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(current - 1); }
+    else if (e.key === 'Home') { go(0); }
+    else if (e.key === 'End') { go(total - 1); }
+  });
+
+  document.addEventListener('click', (e) => {
+    // Click right half = next, left half = back
+    if (e.clientX > window.innerWidth / 2) go(current + 1);
+    else go(current - 1);
+  });
+
+  // Initialize progress bar
+  progress.style.width = (1 / total * 100) + '%';
+</script>
+
+</body>
+</html>
